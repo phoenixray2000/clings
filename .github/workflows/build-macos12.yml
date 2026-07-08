@@ -1,0 +1,45 @@
+name: Build clings for macOS 12 Intel
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show environment
+        run: |
+          sw_vers
+          uname -m
+          xcodebuild -version
+          swift --version
+
+      - name: Lower macOS deployment target to 12
+        run: |
+          perl -0pi -e 's/\.macOS\(\.v14\)/.macOS(.v12)/g' Package.swift
+          cat Package.swift
+
+      - name: Build x86_64 release
+        run: |
+          swift build -c release --arch x86_64
+
+      - name: Collect binary
+        run: |
+          mkdir -p dist
+          BIN=$(find .build -type f -name clings -perm -111 | head -n 1)
+          echo "Binary: $BIN"
+          cp "$BIN" dist/clings
+          chmod +x dist/clings
+          lipo -info dist/clings || file dist/clings
+          ./dist/clings --version || true
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: clings-macos12-x86_64
+          path: dist/clings
+          retention-days: 7
