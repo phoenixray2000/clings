@@ -4,7 +4,7 @@ import PackageDescription
 let package = Package(
     name: "clings",
     platforms: [
-        .macOS(.v14)
+        .macOS(.v12)
     ],
     products: [
         .executable(name: "clings", targets: ["ClingsCLI"]),
