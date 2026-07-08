@@ -2,6 +2,13 @@ name: Build clings for macOS 12 Intel
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'Package.swift'
+      - 'Sources/**'
+      - '.github/workflows/build-macos12.yml'
 
 jobs:
   build:
@@ -18,10 +25,9 @@ jobs:
           xcodebuild -version
           swift --version
 
-      - name: Lower macOS deployment target to 12
+      - name: Verify macOS deployment target
         run: |
-          perl -0pi -e 's/\.macOS\(\.v14\)/.macOS(.v12)/g' Package.swift
-          cat Package.swift
+          grep -n "macOS" Package.swift
 
       - name: Build x86_64 release
         run: |
@@ -32,6 +38,7 @@ jobs:
           mkdir -p dist
           BIN=$(find .build -type f -name clings -perm -111 | head -n 1)
           echo "Binary: $BIN"
+          test -n "$BIN"
           cp "$BIN" dist/clings
           chmod +x dist/clings
           lipo -info dist/clings || file dist/clings
