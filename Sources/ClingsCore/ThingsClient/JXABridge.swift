@@ -99,7 +99,7 @@ public actor JXABridge {
 
             // Task for timeout
             group.addTask {
-                try await Task.sleep(for: .seconds(self.timeout))
+                try await Task.sleep(nanoseconds: UInt64(self.timeout * 1_000_000_000))
                 process.terminate()
                 throw JXAError.timeout
             }
@@ -215,7 +215,7 @@ public actor JXABridge {
 
             // Task for timeout
             group.addTask {
-                try await Task.sleep(for: .seconds(self.timeout))
+                try await Task.sleep(nanoseconds: UInt64(self.timeout * 1_000_000_000))
                 process.terminate()
                 throw JXAError.timeout
             }
