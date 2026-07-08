@@ -50,3 +50,4 @@ jobs:
           name: clings-macos12-x86_64
           path: dist/clings
           retention-days: 7
+
