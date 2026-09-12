@@ -7,22 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **`someday`/`anytime`/etc. list drift from Things**: `ThingsDatabase` list queries (`fetchList`, `search`) no longer include Things' internal repeating-task templates, which are hidden generator rows (identified by a non-null `rt1_recurrenceRule`) rather than real todos.
+- **Deadline decoding**: `deadline` values are now decoded using Things' packed date format (`(year << 16) | (month << 12) | (day << 7)`) instead of being misread as raw seconds since the Cocoa reference date. The previous decoding produced a nonsensical shared date (e.g. April 23, 2009) for every todo carrying Things' year-4001 "no real deadline" sentinel; that sentinel now correctly decodes to `nil`.
+- **Trashed project descendants**: Todos filed (directly, or via a heading) under a trashed project are now excluded from every list except Trash, matching Things' own behavior. Previously only a todo's own `trashed` flag was checked, so items under a trashed project kept appearing everywhere.
+- **`someday` vs. a concrete start date**: The `someday` list now excludes todos that also carry a `startDate`, matching how Things itself buckets them (under Anytime/Upcoming instead of Someday).
+- **Project resolution through headings**: Todos filed under a heading (rather than directly under a project) now correctly resolve their parent project instead of reporting no project.
+- **Untitled todos rendered as a blank line**: `TextOutputFormatter` now renders todos with an empty title as `(no title)` in both list and detail views, instead of a bare checkbox with nothing after it.
+
+## [0.3.1] - 2026-07-09
+
 ### Added
 
 - **Productivity workflow commands**: Added `views`, `template`, `undo`, `focus`, `pick`, `doctor`, and `project audit` command families to support saved filters, reusable task templates, recent-mutation rollback, focused work queues, interactive follow-up selection, local environment diagnostics, and project health auditing.
 - **Config-backed local state**: Added JSON-backed storage for saved views, templates, undo history, and weekly review session state under the clings config directory.
 - **Command reference and testing docs**: Added `docs/cli/command-reference.md` and `docs/development/testing-and-coverage.md` to document the expanded CLI surface and the source-only Swift Testing coverage workflow.
+- **Explicit database paths**: Added public initializers for callers and tests to construct `ThingsDatabase` and `HybridThingsClient` with an explicit Things database path.
+- **GitHub Actions CI**: Added macOS build, test, and release-build checks using the Swift 6 toolchain.
+- **Project support links**: Added Buy Me a Coffee links to the README.
 
 ### Changed
 
 - **CLI help coverage**: Expanded root and subcommand help text with usage guidance and concrete examples across the command tree, and synchronized shell completions with the current top-level and nested commands.
 - **README command reference**: Updated README examples and the command table to reflect the current command surface, including the new productivity workflows and diagnostic tooling.
 - **Weekly review and focus workflows**: Improved review summaries and added richer project/deadline heuristics for more actionable output from review and focus-oriented commands.
+- **Today list selection**: Expanded Today results to include eligible scheduled, overdue, and deadline-based tasks while excluding future and deadline-suppressed items, and preserved manual Today ordering ahead of automatically included items.
+- **Public documentation examples**: Replaced personal and environment-specific examples with neutral public-facing examples.
 
 ### Fixed
 
 - **Coverage target enforcement**: Extended Swift Testing coverage across Things client, JXA bridge, database, NLP, config-store, formatter, and CLI paths so source-only coverage now stays above the 80% project target.
 - **Release docs drift detection**: Adjusted help/completion text and documentation so the release docs check now passes against the expanded CLI surface without false subcommand parsing.
+- **CI without Things 3**: Hardened JXA bridge tests so they pass on GitHub-hosted macOS runners where Things 3 is not installed.
 
 ## [0.3.0] - 2026-03-04
 
